@@ -5,45 +5,56 @@ import (
 	"fmt"
 	"os"
 	"regexp"
+	"strings"
 )
 
-func ReadFile(filename string) {
+func CountWords(filename string) (int, int) {
 	file, err := os.Open(filename)
 	if err != nil {
-		fmt.Println("There is an error !", err)
+		fmt.Println("There is an error ! ", err)
 	}
-
 	defer file.Close()
 
 	wordScans := bufio.NewScanner(file)
 	wordScans.Split(bufio.ScanWords)
-	var counter, vowel int
+	var word, vowel int
 	for wordScans.Scan() {
-		counter++
-		if (wordScans.Text() == ("a")) || (wordScans.Text() == ("e")) || (wordScans.Text() == ("i")) || (wordScans.Text() == ("o")) || (wordScans.Text() == ("u")) {
+		word++
+		var words string = strings.ToLower(wordScans.Text())
+
+		if (words == ("a")) || (words == ("e")) || (words == ("i")) || (words == ("o")) || (words == ("u")) {
 			vowel++
 		}
 	}
+	return word, vowel
 
-	file1, err := os.Open(filename)
+}
+
+func CountLines(filename string) int {
+	file, err := os.Open(filename)
 	if err != nil {
 		fmt.Println(err.Error())
 	}
 
-	lineScans := bufio.NewScanner(file1)
+	lineScans := bufio.NewScanner(file)
 	lineScans.Split(bufio.ScanLines)
 	var Line int
 	for lineScans.Scan() {
 		Line++
 	}
+	return Line
 
-	file2, err := os.Open(filename)
+}
+func countChar(filename string) (int, int, int) {
+	file, err := os.Open(filename)
 	if err != nil {
+
 		fmt.Println(err.Error())
 	}
-	charScans := bufio.NewScanner(file2)
+	charScans := bufio.NewScanner(file)
 	charScans.Split(bufio.ScanBytes)
-	var char, punc int
+	var char, punc, integers int
+
 	for charScans.Scan() {
 		if charScans.Text() != " " {
 			char++
@@ -51,30 +62,23 @@ func ReadFile(filename string) {
 		if (charScans.Text() == (".")) || (charScans.Text() == (",")) || (charScans.Text() == (";")) || (charScans.Text() == ("!")) || (charScans.Text() == ("'")) {
 			punc++
 		}
-	}
-
-	file3, err := os.Open(filename)
-	if err != nil {
-		fmt.Println(err.Error())
-	}
-	intScans := bufio.NewScanner(file3)
-	intScans.Split(bufio.ScanBytes)
-	var integers int
-	for intScans.Scan() {
-		if regexp.MustCompile(`\d`).MatchString(intScans.Text()) {
+		if regexp.MustCompile(`\d`).MatchString(charScans.Text()) {
 			integers++
 		}
 	}
+	return char, punc, integers
 
-	fmt.Printf("Numbers of Words : %v\n", counter)
-	fmt.Printf("Numbers of Lines : %v\n", Line)
-	fmt.Printf("Numbers of Characters : %v\n", char)
-	fmt.Printf("Numbers of Vowels : %v\n", vowel)
-	fmt.Printf("Numbers of Punctuations : %v\n", punc)
-	fmt.Printf("Numbers of Integers : %v\n", integers)
 }
 
 func main() {
 	filename := "text.txt"
-	ReadFile(filename)
+	char, punc, integers := countChar(filename)
+	word, vowel := CountWords(filename)
+	line := CountLines(filename)
+	fmt.Printf("Numbers of Characters : %v\n", char)
+	fmt.Printf("Numbers of Punctuations : %v\n", punc)
+	fmt.Printf("Numbers of Integers : %v\n", integers)
+	fmt.Printf("Numbers of Words : %v\n", word)
+	fmt.Printf("Numbers of Lines : %v\n", line)
+	fmt.Printf("Numbers of Vowels : %v\n", vowel)
 }

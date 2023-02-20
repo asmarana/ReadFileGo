@@ -62,7 +62,7 @@ func countChar(filename string) (int, int, int) {
 		if (charScans.Text() == (".")) || (charScans.Text() == (",")) || (charScans.Text() == (";")) || (charScans.Text() == ("!")) || (charScans.Text() == ("'")) {
 			punc++
 		}
-		if regexp.MustCompile(`\d`).MatchString(charScans.Text()) {
+		if regexp.MustCompile(`\d` + `\w`).MatchString(charScans.Text()) {
 			integers++
 		}
 	}

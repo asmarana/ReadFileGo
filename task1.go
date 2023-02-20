@@ -3,8 +3,11 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
-	// "unicode"
+	"sync"
+	"time"
 )
+
+var wg sync.WaitGroup
 
 func readFile(filename string) string {
 	context, err := ioutil.ReadFile(filename)
@@ -14,71 +17,75 @@ func readFile(filename string) string {
 	return string(context)
 }
 
-func countWords(context string) int {
+func countWords(c *chan int, context string) {
 
 	var words int
-	for _, i := range context {
-		if is_word(i) {
+	for _, char := range context {
+		if isWord(char) {
 			words++
 		}
 	}
-	return words
+	*c <- words
+	defer wg.Done()
 }
 
-func countVowel(context string) int {
+func countVowel(c1 *chan int, context string) {
 	var vowel int
-	for _, i := range context {
-		switch i {
+	for _, char := range context {
+		switch char {
 		case 'a', 'e', 'i', 'o', 'u', 'A', 'E', 'I', 'O', 'U':
 			vowel++
 		}
 	}
-	return vowel
+	*c1 <- vowel
+	defer wg.Done()
 }
 
-func countIntegers(context string) int {
+func countIntegers(c2 *chan int, context string) {
 	var integers int
-	for _, i := range context {
-		// unicode.IsDigit(i)
-		switch i {
+	for _, char := range context {
+		switch char {
 		case '1', '2', '3', '4', '5', '6', '7', '8', '9', '0':
 			integers++
 		}
 	}
-	return integers
+	*c2 <- integers
+	defer wg.Done()
 }
 
-func countLines(context string) int {
+func countLines(c3 *chan int, context string) {
 	var lines int
-	for _, i := range context {
-		if is_line(i) {
+	for _, char := range context {
+		if isLine(char) {
 			lines++
 		}
 	}
-	return lines
+	*c3 <- lines
+	defer wg.Done()
 }
 
-func countPunc(context string) int {
+func countPunc(c4 *chan int, context string) {
 	var punc int
-	for _, i := range context {
-		switch i {
-		case ',', '.', ';', '"', '=', '!', '/':
+	for _, char := range context {
+		switch char {
+		case ',', '.', ';', '"', '=', '!', '/', '~', '@', '#', '%', '&', '?', ':':
 			punc++
 		}
 	}
-	return punc
+	*c4 <- punc
+	defer wg.Done()
 }
 
-func is_word(i rune) bool {
-	if i == ' ' {
+func isWord(char rune) bool {
+	if char == ' ' {
 		return true
 	} else {
 		return false
 	}
 }
 
-func is_line(i rune) bool {
-	if i == '\n' {
+func isLine(char rune) bool {
+	if char == '\n' {
 		return true
 	} else {
 		return false
@@ -86,18 +93,27 @@ func is_line(i rune) bool {
 }
 
 func main() {
+	start := time.Now()
+	wg.Add(5)
 	filename := "text.txt"
+	c := make(chan int, 1)
+	c1 := make(chan int, 1)
+	c2 := make(chan int, 1)
+	c3 := make(chan int, 1)
+	c4 := make(chan int, 1)
 	context := readFile(filename)
-	words := countWords(context)
-	vowels := countVowel(context)
-	integers := countIntegers(context)
-	lines := countLines(context)
-	punc := countPunc(context)
+	go countWords(&c, context)
+	go countVowel(&c1, context)
+	go countIntegers(&c2, context)
+	go countLines(&c3, context)
+	go countPunc(&c4, context)
+	fmt.Printf("Numbers of Words : %v\n", <-c)
+	fmt.Printf("Numbers of Vowels : %v\n", <-c1)
+	fmt.Printf("Numbers of Integers : %v\n", <-c2)
+	fmt.Printf("Numbers of Lines : %v\n", <-c3)
+	fmt.Printf("Numbers of Punctuations : %v\n", <-c4)
 
-	fmt.Printf("Numbers of Words : %v\n", words)
-	fmt.Printf("Numbers of Vowels : %v\n", vowels)
-	fmt.Printf("Numbers of Integers : %v\n", integers)
-	fmt.Printf("Numbers of Punctuations : %v\n", punc)
-	fmt.Printf("Numbers of Lines : %v\n", lines)
-
+	wg.Wait()
+	timetook := time.Since(start)
+	fmt.Printf("Time in execution: %v\n", timetook)
 }

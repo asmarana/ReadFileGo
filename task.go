@@ -6,6 +6,7 @@ import (
 	"os"
 	"regexp"
 	"strings"
+	"time"
 )
 
 func CountWords(filename string) (int, int) {
@@ -71,6 +72,7 @@ func countChar(filename string) (int, int, int) {
 }
 
 func main() {
+	start := time.Now()
 	filename := "text.txt"
 	char, punc, integers := countChar(filename)
 	word, vowel := CountWords(filename)
@@ -81,4 +83,6 @@ func main() {
 	fmt.Printf("Numbers of Words : %v\n", word)
 	fmt.Printf("Numbers of Lines : %v\n", line)
 	fmt.Printf("Numbers of Vowels : %v\n", vowel)
+	timetook := time.Since(start)
+	fmt.Printf("Time in execution: %v\n", timetook)
 }

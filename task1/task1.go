@@ -1,15 +1,14 @@
-package main
+package task1
 
 import (
 	"fmt"
 	"io/ioutil"
 	"sync"
-	"time"
 )
 
 var wg sync.WaitGroup
 
-func readFile(filename string) string {
+func ReadFile(filename string) string {
 	content, err := ioutil.ReadFile(filename)
 	if err != nil {
 		fmt.Println("There is an error", err)
@@ -17,7 +16,7 @@ func readFile(filename string) string {
 	return string(content)
 }
 
-func fileInfo(c *chan int, content string) {
+func FileInfo(c *chan int, content string) {
 
 	var words, vowel, integers, lines, punc int
 	for _, char := range content {
@@ -62,22 +61,4 @@ func isLine(char rune) bool {
 	} else {
 		return false
 	}
-}
-
-func main() {
-	start := time.Now()
-	wg.Add(1)
-	filename := "text.txt"
-	c := make(chan int, 5)
-	content := readFile(filename)
-	go fileInfo(&c, content)
-	fmt.Printf("Numbers of Words : %v\n", <-c)
-	fmt.Printf("Numbers of Vowels : %v\n", <-c)
-	fmt.Printf("Numbers of Integers : %v\n", <-c)
-	fmt.Printf("Numbers of Lines : %v\n", <-c)
-	fmt.Printf("Numbers of Punctuations : %v\n", <-c)
-
-	wg.Wait()
-	timetook := time.Since(start)
-	fmt.Printf("Time in execution: %v\n", timetook)
 }
